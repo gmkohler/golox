@@ -1,0 +1,32 @@
+package golox
+
+const (
+	runeNull           rune = 0
+	runeTab            rune = '\t'
+	runeNewline        rune = '\n'
+	runeCarriageReturn rune = '\r'
+	runeSpace          rune = ' '
+	runeBang           rune = '!'
+	runeDoubleQuote    rune = '"'
+	runeLeftParen      rune = '('
+	runeRightParen     rune = ')'
+	runeStar           rune = '*'
+	runePlus           rune = '+'
+	runeComma          rune = ','
+	runeMinus          rune = '-'
+	runeDot            rune = '.'
+	runeSlash          rune = '/'
+	runeZero           rune = '0'
+	runeNine           rune = '9'
+	runeSemicolon      rune = ';'
+	runeLess           rune = '<'
+	runeEqual          rune = '='
+	runeGreater        rune = '>'
+	runeAUpper         rune = 'A'
+	runeZUpper         rune = 'Z'
+	runeUnderscore     rune = '_'
+	runeALower         rune = 'a'
+	runeZLower         rune = 'z'
+	runeLeftBrace      rune = '{'
+	runeRightBrace     rune = '}'
+)
