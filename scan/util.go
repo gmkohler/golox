@@ -1,4 +1,4 @@
-package golox
+package scan
 
 func isAlpha(r rune) bool {
 	return r >= runeALower && r <= runeZLower ||

@@ -1,14 +1,15 @@
-package golox
+package scan
 
 import (
 	"fmt"
+	"github.com/gmkohler/golox/ast"
 	"os"
 	"strconv"
 )
 
 type sourceScanner struct {
 	source  string // consider some sort of reader
-	tokens  []Token
+	tokens  []*ast.Token
 	start   int
 	current int
 	line    int
@@ -21,7 +22,7 @@ func NewSourceScanner(source string) Scanner {
 	}
 }
 
-func (s *sourceScanner) ScanTokens() ([]Token, error) {
+func (s *sourceScanner) ScanTokens() ([]*ast.Token, error) {
 	var err error
 	for !s.atEnd() {
 		s.start = s.current
@@ -30,10 +31,11 @@ func (s *sourceScanner) ScanTokens() ([]Token, error) {
 		}
 	}
 
-	s.tokens = append(s.tokens, Token{
-		tType: tokenTypeEof,
-		line:  s.line,
-	})
+	s.tokens = append(s.tokens, ast.NewToken(
+		ast.TokenTypeEof,
+		"",
+		s.line,
+	))
 
 	return s.tokens, nil
 }
@@ -41,47 +43,47 @@ func (s *sourceScanner) ScanTokens() ([]Token, error) {
 func (s *sourceScanner) scanToken() error {
 	switch r := s.advance(); r {
 	case runeLeftParen:
-		s.addToken(tokenTypeLeftParen)
+		s.addToken(ast.TokenTypeLeftParen)
 	case runeRightParen:
-		s.addToken(tokenTypeRightParen)
+		s.addToken(ast.TokenTypeRightParen)
 	case runeLeftBrace:
-		s.addToken(tokenTypeLeftBrace)
+		s.addToken(ast.TokenTypeLeftBrace)
 	case runeRightBrace:
-		s.addToken(tokenTypeRightBrace)
+		s.addToken(ast.TokenTypeRightBrace)
 	case runeComma:
-		s.addToken(tokenTypeComma)
+		s.addToken(ast.TokenTypeComma)
 	case runeDot:
-		s.addToken(tokenTypeDot)
+		s.addToken(ast.TokenTypeDot)
 	case runeMinus:
-		s.addToken(tokenTypeMinus)
+		s.addToken(ast.TokenTypeMinus)
 	case runePlus:
-		s.addToken(tokenTypePlus)
+		s.addToken(ast.TokenTypePlus)
 	case runeSemicolon:
-		s.addToken(tokenTypeSemicolon)
+		s.addToken(ast.TokenTypeSemicolon)
 	case runeStar:
-		s.addToken(tokenTypeStar)
+		s.addToken(ast.TokenTypeStar)
 	case runeBang:
-		token := tokenTypeBang
+		token := ast.TokenTypeBang
 		if s.match(runeEqual) {
-			token = tokenTypeBangEqual
+			token = ast.TokenTypeBangEqual
 		}
 		s.addToken(token)
 	case runeEqual:
-		token := tokenTypeEqual
+		token := ast.TokenTypeEqual
 		if s.match(runeEqual) {
-			token = tokenTypeEqualEqual
+			token = ast.TokenTypeEqualEqual
 		}
 		s.addToken(token)
 	case runeLess:
-		token := tokenTypeLess
+		token := ast.TokenTypeLess
 		if s.match(runeEqual) {
-			token = tokenTypeLessEqual
+			token = ast.TokenTypeLessEqual
 		}
 		s.addToken(token)
 	case runeGreater:
-		token := tokenTypeGreater
+		token := ast.TokenTypeGreater
 		if s.match(runeEqual) {
-			token = tokenTypeGreaterEqual
+			token = ast.TokenTypeGreaterEqual
 		}
 		s.addToken(token)
 	case runeSlash:
@@ -91,7 +93,7 @@ func (s *sourceScanner) scanToken() error {
 				s.advance()
 			}
 		} else {
-			s.addToken(tokenTypeSlash)
+			s.addToken(ast.TokenTypeSlash)
 		}
 	case runeNewline:
 		s.line++
@@ -115,19 +117,19 @@ func (s *sourceScanner) scanToken() error {
 	return nil
 }
 
-func (s *sourceScanner) addToken(tt tokenType) {
+func (s *sourceScanner) addToken(tt ast.TokenType) {
 	s.addTokenWithLiteral(tt, nil)
 }
 
-func (s *sourceScanner) addTokenWithLiteral(tt tokenType, literal any) {
+func (s *sourceScanner) addTokenWithLiteral(tt ast.TokenType, literal any) {
 	s.tokens = append(
 		s.tokens,
-		Token{
-			tType:   tt,
-			lexeme:  s.source[s.start:s.current],
-			literal: literal,
-			line:    s.line,
-		},
+		ast.NewTokenWithLiteral(
+			tt,
+			s.source[s.start:s.current],
+			literal,
+			s.line,
+		),
 	)
 }
 
@@ -160,7 +162,7 @@ func (s *sourceScanner) string() error {
 	}
 	s.advance()
 	value := s.source[s.start+1 : s.current-1]
-	s.addTokenWithLiteral(tokenTypeString, value)
+	s.addTokenWithLiteral(ast.TokenTypeString, value)
 	return nil
 }
 
@@ -178,7 +180,7 @@ func (s *sourceScanner) number() error {
 	if err != nil {
 		return err
 	}
-	s.addTokenWithLiteral(tokenTypeNumber, f)
+	s.addTokenWithLiteral(ast.TokenTypeNumber, f)
 	return nil
 }
 
@@ -187,9 +189,9 @@ func (s *sourceScanner) identifier() {
 		s.advance()
 	}
 
-	tt := tokenTypeFromKeyword(s.source[s.start:s.current])
-	if tt == tokenTypeUnrecognized {
-		tt = tokenTypeIdentifier
+	tt := ast.TokenTypeFromKeyword(s.source[s.start:s.current])
+	if tt == ast.TokenTypeUnrecognized {
+		tt = ast.TokenTypeIdentifier
 	}
 	s.addToken(tt)
 }
