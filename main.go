@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	scanner "golox/pkg"
+	"github.com/gmkohler/golox/scan"
 	"io"
 	"log"
 	"os"
@@ -68,7 +68,7 @@ func runPrompt() error {
 }
 
 func run(source string) error {
-	s := scanner.NewSourceScanner(source)
+	s := scan.NewSourceScanner(source)
 	tokens, err := s.ScanTokens()
 	if err != nil {
 		return fmt.Errorf("run: %w", err)

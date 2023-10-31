@@ -1,4 +1,4 @@
-package golox
+package scan
 
 const (
 	runeNull           rune = 0
